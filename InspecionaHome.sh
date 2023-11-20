@@ -16,33 +16,30 @@
 
 #Serão procurados arquivos do tipo .mp4, .mp3, .jpg
 
-for user in /home/*
-do
-	MP4COUNT=0
-	MP3COUNT=0
-	JPGCOUNT=0
-	OLDIFS=$IFS
-	IFS=$'\n'
-	for files in $(find $user -name '*.mp3' -o -name '*.mp4' -o -name '*.jpg')
-	do
-		case $files in
-			*.mp4)
-				MP4COUNT=$(expr $MP4COUNT + 1 )
-				;;
-			*.mp3)
-				MP3COUNT=$(expr $MP3COUNT + 1)
-				;;
-			*.jpg)
-				JPGCOUNT=$(expr $JGPCOUNT + 1)
-				;;
-		esac
-	done #fim do for do find
+for user in /home/*; do
+    MP4COUNT=0
+    MP3COUNT=0
+    JPGCOUNT=0
+    USER=$(basename "$user")
 
-echo "Usuario: $(basename $user)"
-echo "Arquivos JPG: $JPGCOUNT"
-echo "Arquivos MP3: $MP3COUNT"
-echo "Arquivos MP4: $MP4COUNT"
-echo
-done # fim do for do /home
+    if [ ! -d "$user" ]; then
+        echo "Erro: $USER não é um diretório válido."
+        continue
+    fi
 
-IFS=$OLDIFS
+    # Encontra os arquivos e armazena em arrays separados por tipo
+    mapfile -t mp4_files < <(find "$user" -type f -name '*.mp4')
+    mapfile -t mp3_files < <(find "$user" -type f -name '*.mp3')
+    mapfile -t jpg_files < <(find "$user" -type f -name '*.jpg')
+
+    # Conta os elementos nos arrays
+    MP4COUNT=${#mp4_files[@]}
+    MP3COUNT=${#mp3_files[@]}
+    JPGCOUNT=${#jpg_files[@]}
+
+    echo "Usuário: $USER"
+    echo "Arquivos JPG: $JPGCOUNT"
+    echo "Arquivos MP3: $MP3COUNT"
+    echo "Arquivos MP4: $MP4COUNT"
+    echo
+done
